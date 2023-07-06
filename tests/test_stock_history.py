@@ -28,10 +28,10 @@ def test_transform(symbols, dir_data_lake, filename_out):
 if __name__ == '__main__':
 
     dir_thisfile = os.path.dirname(os.path.abspath(__file__))
-    dir_parent = os.path.join(dir_thisfile, '../')
-    dir_data_lake = os.path.join(dir_parent, 'data_lake/stock_history/')
+    dir_repo = os.path.join(dir_thisfile, '../')
+    dir_data_lake = os.path.join(dir_repo, 'data_lake/stock_history/')
 
-    dir_data = os.path.join(dir_parent, 'data')
+    dir_data = os.path.join(dir_repo, 'data')
 
     if not os.path.exists(dir_data):
         os.makedirs(dir_data)
@@ -41,5 +41,5 @@ if __name__ == '__main__':
 
     test_extract(symbols, dir_data_lake)
 
-    filename = os.path.join(dir_data, 'stock_history.csv')
-    df = test_transform(symbols, dir_data_lake, filename)
+    filename_out = os.path.join(dir_data, 'stock_history.csv')
+    df = test_transform(symbols, dir_data_lake, filename_out)
