@@ -19,7 +19,7 @@ class StockHistory_ETL(Base_ETL):
         self.dir_data_lake = os.path.join(self.dir_repo, 'data_lake')
         self.dir_data = os.path.join(self.dir_repo, 'data')
 
-    def extract(self, symbol, filename=None):
+    def extract(self, symbol, filename_out=None):
         ''' Extract Stock Market Data with AlphaVantage API given symbol of the company
             Args:
                 symbol: 'JPM' (JPMorgan Chase & Co.)
@@ -38,13 +38,13 @@ class StockHistory_ETL(Base_ETL):
 
         raw_data = requests.get(self.url_AlphaVtg, params=params)
         
-        if filename is None:
+        if filename_out is None:
             if not os.path.exists(self.dir_data_lake):
                 os.makedirs(self.dir_data_lake)
 
-            filename = os.path.join(self.dir_data_lake, symbol+'.json')
+            filename_out = os.path.join(self.dir_data_lake, symbol+'.json')
 
-        self.save_to_json(raw_data.json(), filename)
+        self.save_to_json(raw_data.json(), filename_out)
 
     def _filter_by_date_range(self, df, date_range):
         df = df.loc[df['date'].isin(pd.date_range(start=date_range[0], end=date_range[1]))]
@@ -102,10 +102,10 @@ class StockHistory_ETL(Base_ETL):
 
         return df
     
-    def transform(self, symbols, dir_data_lake, filename=None):
+    def transform(self, symbols, dir_data_lake, filename_out=None):
         
-        if filename is None:
-            filename = os.path.join(self.dir_data, 'stock_history.csv')
+        if filename_out is None:
+            filename_out = os.path.join(self.dir_data, 'stock_history.csv')
 
         df_list = []
         for symbol in symbols:
@@ -114,7 +114,7 @@ class StockHistory_ETL(Base_ETL):
             df_list.append(df)
     
         joined_df = self.concat_dataframes(df_list)
-        self.save_to_csv(joined_df, filename=filename)
+        self.save_to_csv(joined_df, filename=filename_out)
 
         return joined_df
 

@@ -16,11 +16,11 @@ def test_extract(symbols, dir_data_lake):
         etl.extract(symbol, filename)
 
 
-def test_transform(symbols, dir_data_lake, filename):
+def test_transform(symbols, dir_data_lake, filename_out):
 
     etl = StockHistory_ETL()
 
-    df = etl.transform(symbols, dir_data_lake, filename)
+    df = etl.transform(symbols, dir_data_lake, filename_out)
 
     return df
 
