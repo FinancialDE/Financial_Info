@@ -14,6 +14,11 @@ class StockHistory_ETL(Base_ETL):
         self._APIkey = os.getenv('STOCK_API_KEY')
         self.url_AlphaVtg = 'https://www.alphavantage.co/query'
 
+        self.dir_thisfile = os.path.dirname(os.path.abspath(__file__))
+        self.dir_repo = os.path.join(self.dir_thisfile, '../')
+        self.dir_data_lake = os.path.join(self.dir_repo, 'data_lake')
+        self.dir_data = os.path.join(self.dir_repo, 'data')
+
     def extract(self, symbol, filename=None):
         ''' Extract Stock Market Data with AlphaVantage API given symbol of the company
             Args:
@@ -34,13 +39,12 @@ class StockHistory_ETL(Base_ETL):
         raw_data = requests.get(self.url_AlphaVtg, params=params)
         
         if filename is None:
-            dir_thisfile = os.path.dirname(os.path.abspath(__file__))
-            dir_parent = os.path.join(dir_thisfile, '../')
-            dir_data_lake = os.path.join(dir_parent, 'data_lake')
-            filename = os.path.join(dir_data_lake, symbol+'.json')
+            if not os.path.exists(self.dir_data_lake):
+                os.makedirs(self.dir_data_lake)
+
+            filename = os.path.join(self.dir_data_lake, symbol+'.json')
 
         self.save_to_json(raw_data.json(), filename)
-        #self._save_raw_data_in_s3(raw_data, symbol)
 
     def _filter_by_date_range(self, df, date_range):
         df = df.loc[df['date'].isin(pd.date_range(start=date_range[0], end=date_range[1]))]
@@ -61,9 +65,9 @@ class StockHistory_ETL(Base_ETL):
         return is_annual
 
 
-    def transform(self, symbol, dir_data):
+    def transform_single_firm(self, symbol, dir_data_lake):
 
-        filename = os.path.join(dir_data, symbol+'.json')
+        filename = os.path.join(dir_data_lake, symbol+'.json')
         with open(filename, "r") as file:
             raw_data = json.load(file)
 
@@ -97,6 +101,22 @@ class StockHistory_ETL(Base_ETL):
         df['is_annual'] = self._get_is_annual(dates=df.date)
 
         return df
+    
+    def transform(self, symbols, dir_data_lake, filename=None):
+        
+        if filename is None:
+            filename = os.path.join(self.dir_data, 'stock_history.csv')
+
+        df_list = []
+        for symbol in symbols:
+        
+            df = self.transform_single_firm(symbol, dir_data_lake)
+            df_list.append(df)
+    
+        joined_df = self.concat_dataframes(df_list)
+        self.save_to_csv(joined_df, filename=filename)
+
+        return joined_df
 
     def load(self, file_csv, table_name):
         '''Load CSV data to SQL Database'''
