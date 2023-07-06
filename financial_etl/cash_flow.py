@@ -3,29 +3,21 @@ from yahooquery import Ticker
 from financial_etl.base import Base_ETL
 import pandas as pd
 
-class IncomeStatement_ETL(Base_ETL):
-    
+class CashFlow_ETL(Base_ETL):
+
     def __init__(self):
         self._username = os.getenv('YFINANCE_USER')
         self._password = os.getenv('YFINANCE_PASSWORD')
 
     def extract(self, symbols, filename_out=None):
-        '''Extract Income Statement with Yfianace API
-
-            Args: 
-                symbols = ['JPM', 'GS', 'MS', 'SIVBQ']
-            
-            Returns:
-                pd.DataFrame
-        '''
-
-        raw_data = Ticker(symbols=symbols, username=self._username, password=self._password).p_income_statement(trailing=False, frequency='q')
+        
+        raw_data = Ticker(symbols, username=self._username, password=self._password).p_cash_flow(trailing=False, frequency='q')
 
         if filename_out is None:
             if not os.path.exists(self.dir_data_lake):
                 os.makedirs(self.dir_data_lake)
             
-            filename_out = os.path.join(self.dir_data_lake, 'income_statement.csv')
+            filename_out = os.path.join(self.dir_data_lake, 'cash_flow.csv')
 
         raw_data.to_csv(filename_out, index=True)
     
@@ -34,7 +26,7 @@ class IncomeStatement_ETL(Base_ETL):
 
         null_fractions = df.isnull().mean()
         columns_to_drop = null_fractions[null_fractions > drop_threshold].index
-        
+
         print("Number of columns in the original DataFrame:", len(df.columns))
         print("Number of columns to be dropped:", len(columns_to_drop))
         print('Columns to drop:', columns_to_drop)
@@ -54,9 +46,9 @@ class IncomeStatement_ETL(Base_ETL):
         df_raw = pd.read_csv(filename_in)
 
         df = self._rename_columns(df_raw, column_rename_mapping={'asOfDate': 'date'})
-        
-        df = self._filter_by_date_range(df, date_range=['2017-01-01', '2022-03-31'])
 
+        df = self._filter_by_date_range(df, date_range=['2017-01-01', '2022-03-31'])
+        
         df = self._filter_columns(df, drop_threshold)
 
         df.to_csv(filename_out, index=False)
