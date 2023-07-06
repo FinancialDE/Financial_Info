@@ -64,3 +64,15 @@ class Base_ETL():
             # Upload the temporary file to Amazon S3
             object_key = f'{symbol}.json'  # Customize the object key as needed
             s3_client.upload_file(temp_file.name, self.aws_s3_bucket, object_key)
+
+    def _filter_columns(self, df, drop_threshold=0.8):
+        ''' Drop columns that have a high percentage of null values'''
+
+        null_fractions = df.isnull().mean()
+        columns_to_drop = null_fractions[null_fractions > drop_threshold].index
+        
+        print("Number of columns in the original DataFrame:", len(df.columns))
+        print("Number of columns to be dropped:", len(columns_to_drop))
+        print('Columns to drop:', columns_to_drop)
+        
+        return df.drop(columns=columns_to_drop)
