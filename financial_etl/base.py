@@ -18,6 +18,14 @@ class Base_ETL():
         self.aws_rds_user = os.getenv('AWS_RDS_DB_USER')
         self.aws_rds_password = os.getenv('AWS_RDS_DB_PASSWORD')
 
+        self._get_path_variables()
+    
+    def _get_path_variables(self):
+        self.dir_thisfile = os.path.dirname(os.path.abspath(__file__))
+        self.dir_repo = os.path.join(self.dir_thisfile, '../')
+        self.dir_data_lake = os.path.join(self.dir_repo, 'data_lake')
+        self.dir_data = os.path.join(self.dir_repo, 'data')
+
     def extract(self):
         '''Extract raw data based on used API'''
         pass

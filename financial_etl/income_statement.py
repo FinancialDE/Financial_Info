@@ -9,11 +9,6 @@ class IncomeStatement_ETL(Base_ETL):
         self._username = os.getenv('YFINANCE_USER')
         self._password = os.getenv('YFINANCE_PASSWORD')
 
-        self.dir_thisfile = os.path.dirname(os.path.abspath(__file__))
-        self.dir_repo = os.path.join(self.dir_thisfile, '../')
-        self.dir_data_lake = os.path.join(self.dir_repo, 'data_lake')
-        self.dir_data = os.path.join(self.dir_repo, 'data')
-
     def extract(self, symbols, filename_out=None):
         '''Extract Income Statement with Yfianace API
 

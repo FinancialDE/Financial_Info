@@ -14,11 +14,6 @@ class StockHistory_ETL(Base_ETL):
         self._APIkey = os.getenv('STOCK_API_KEY')
         self.url_AlphaVtg = 'https://www.alphavantage.co/query'
 
-        self.dir_thisfile = os.path.dirname(os.path.abspath(__file__))
-        self.dir_repo = os.path.join(self.dir_thisfile, '../')
-        self.dir_data_lake = os.path.join(self.dir_repo, 'data_lake')
-        self.dir_data = os.path.join(self.dir_repo, 'data')
-
     def extract(self, symbol, filename_out=None):
         ''' Extract Stock Market Data with AlphaVantage API given symbol of the company
             Args:
