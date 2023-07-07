@@ -3,7 +3,7 @@ HH's working code (Temporary)
 
 ## Local Environment Setup
 
-- Put a `.env` file in this repository directory. For example:
+- Put a `.env` file in this repository directory. An example content in `.env` would be:
 ```
 YFINANCE_USER = ourYFinanceAccount@gmail.com
 YFINANCE_PASSWORD = ourYFinancePW
