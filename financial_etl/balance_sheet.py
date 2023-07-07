@@ -11,7 +11,7 @@ class BalanceSheet_ETL(Base_ETL):
         self._password = os.getenv('YFINANCE_PASSWORD')
 
     def extract(self, symbols, filename_out=None):
-        '''Extract Income Statement with Yfianace API
+        '''Extract Balance Sheet with Yfianace API
 
             Args: 
                 symbols = ['JPM', 'GS', 'MS', 'SIVBQ']
