@@ -36,5 +36,5 @@ if __name__ == '__main__':
     filename_raw = os.path.join(dir_data_lake, 'company_info.json')
     test_extract(symbols=symbols, filename_out=filename_raw)
 
-    filename_out = os.path.join(dir_data, 'company_info.json')
+    filename_out = os.path.join(dir_data, 'company_info.csv')
     df = test_transform(filename_in=filename_raw, filename_out=filename_out)
