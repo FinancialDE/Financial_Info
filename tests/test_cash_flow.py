@@ -10,11 +10,11 @@ def test_extract(symbols, filename_out):
 
     etl.extract(symbols, filename_out)
 
-def test_transform(filename_in, filename_out, drop_threshold=0.8):
+def test_transform(filename_in, filename_out):
 
     etl = CashFlow_ETL()
 
-    df = etl.transform(filename_in, filename_out, drop_threshold)
+    df = etl.transform(filename_in, filename_out)
 
     return df
 
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     symbols = ['JPM', 'GS']
 
     filename_raw = os.path.join(dir_data_lake, 'cash_flow.csv')
-    test_extract(symbols=symbols, filename_out=filename_raw)
+    #test_extract(symbols=symbols, filename_out=filename_raw)
 
     filename_out = os.path.join(dir_data, 'cash_flow.csv')
-    df = test_transform(filename_in=filename_raw,filename_out=filename_out, drop_threshold=0.8)
+    df = test_transform(filename_in=filename_raw,filename_out=filename_out)
