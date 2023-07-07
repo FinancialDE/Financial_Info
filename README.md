@@ -1,6 +1,20 @@
 # HHworking
 HH's working code (Temporary)
 
+## Local Environment Setup
+
+- Put a `.env` file in this repository directory. For example:
+```
+YFINANCE_USER = ourYFinanceAccount@gmail.com
+YFINANCE_PASSWORD = ourYFinancePW
+AWS_RDS_HOST = ourHost
+AWS_RDS_PORT= ourPORT
+AWS_RDS_DB_NAME = ourNAME
+AWS_RDS_DB_USER = user_name
+AWS_RDS_DB_PASSWORD = ourPW
+STOCK_API_KEY = 0URAPIKEYID
+```
+  
 
 ## Run Tests
 
