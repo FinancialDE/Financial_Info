@@ -10,6 +10,16 @@ class IncomeStatement_ETL(Base_ETL):
         self._username = os.getenv('YFINANCE_USER')
         self._password = os.getenv('YFINANCE_PASSWORD')
 
+        self.columns_to_keep = ['symbol', 'date', 'TotalRevenue', 'SpecialIncomeCharges', 
+                   'PretaxIncome', 'TaxProvision', 'NetIncome', 'NetIncomeCommonStockholders', 
+                   'DilutedNIAvailtoComStockholders', 'BasicEPS', 'DilutedEPS',
+                   'BasicAverageShares', 'DilutedAverageShares', 'InterestIncome', 
+                   'NetIncomeFromContinuingAndDiscontinuedOperation', 'NormalizedIncome', 
+                   'ReconciledDepreciation', 'NetIncomeFromContinuingOperationNetMinorityInterest',
+                   'TotalUnusualItemsExcludingGoodwill', 'TotalUnusualItems', 'TaxRateForCalcs',
+                   'TaxEffectOfUnusualItems'
+                  ]
+
     def extract(self, symbols, filename_out=None):
         '''Extract Income Statement with Yfianace API
 
@@ -39,7 +49,7 @@ class IncomeStatement_ETL(Base_ETL):
         df = df.loc[df['date'].isin(pd.date_range(start=date_range[0], end=date_range[1]))]
         return df.reset_index(drop=True)
     
-    def transform(self, filename_in, filename_out, drop_threshold=0.8):
+    def transform(self, filename_in, filename_out):
 
         df_raw = pd.read_csv(filename_in)
 
@@ -47,7 +57,7 @@ class IncomeStatement_ETL(Base_ETL):
         
         df = self._filter_by_date_range(df, date_range=['2017-01-01', '2022-03-31'])
 
-        df = self._filter_columns(df, drop_threshold)
+        df = df[self.columns_to_keep]
 
         df.to_csv(filename_out, index=False)
 
