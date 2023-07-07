@@ -10,11 +10,11 @@ def test_extract(symbols, filename_out):
 
     etl.extract(symbols, filename_out)
 
-def test_transform(filename_in, filename_out):
+def test_transform(filename_in, filename_out, save_mode='parquet'):
 
     etl = IncomeStatement_ETL()
 
-    df = etl.transform(filename_in, filename_out)
+    df = etl.transform(filename_in, filename_out, save_mode)
 
     return df
 
@@ -33,7 +33,10 @@ if __name__ == '__main__':
     symbols = ['JPM', 'GS']
 
     filename_raw = os.path.join(dir_data_lake, 'income_statement.csv')
-    test_extract(symbols=symbols, filename_out=filename_raw)
+    #test_extract(symbols=symbols, filename_out=filename_raw)
 
-    filename_out = os.path.join(dir_data, 'income_statement.csv')
-    df = test_transform(filename_in=filename_raw, filename_out=filename_out)
+    filename_out = os.path.join(dir_data, 'income_statement.parquet')
+    df = test_transform(filename_in=filename_raw, filename_out=filename_out, save_mode='parquet')
+
+    #filename_out = os.path.join(dir_data, 'income_statement.csv')
+    #df = test_transform(filename_in=filename_raw, filename_out=filename_out, save_mode='csv')
