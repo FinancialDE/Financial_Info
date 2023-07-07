@@ -34,7 +34,7 @@ class CompanyInfo_ETL(Base_ETL):
     def _rename_columns(self, df, column_rename_mapping={'asOfDate': 'date'}):
         return df.rename(columns=column_rename_mapping)
     
-    def transform(self, filename_in, filename_out):
+    def transform(self, filename_in, filename_out, save_mode='parquet'):
         
         with open(filename_in, "r") as file:
             raw_data = json.load(file)
@@ -55,6 +55,10 @@ class CompanyInfo_ETL(Base_ETL):
 
         df = self._rename_columns(df, column_rename_mapping={'address1': 'address'})
 
-        df.to_csv(filename_out, index=False)
+        if save_mode == 'parquet':
+            df.to_parquet(filename_out)
+        
+        elif save_mode == 'csv':
+            df.to_csv(filename_out, index=False)
 
         return df

@@ -10,7 +10,7 @@ def test_extract(symbols, filename_out):
 
     etl.extract(symbols, filename_out)
 
-def test_transform(filename_in, filename_out):
+def test_transform(filename_in, filename_out, save_mode='parquet'):
 
     etl = CompanyInfo_ETL()
     df = etl.transform(filename_in, filename_out)
@@ -34,7 +34,10 @@ if __name__ == '__main__':
     symbols = ['JPM', 'GS']
 
     filename_raw = os.path.join(dir_data_lake, 'company_info.json')
-    test_extract(symbols=symbols, filename_out=filename_raw)
+    #test_extract(symbols=symbols, filename_out=filename_raw)
 
-    filename_out = os.path.join(dir_data, 'company_info.csv')
-    df = test_transform(filename_in=filename_raw, filename_out=filename_out)
+    filename_out = os.path.join(dir_data, 'company_info.parquet')
+    df = test_transform(filename_in=filename_raw, filename_out=filename_out, save_mode='parquet')
+
+    #filename_out = os.path.join(dir_data, 'company_info.csv')
+    #df = test_transform(filename_in=filename_raw, filename_out=filename_out, save_mode='csv')
