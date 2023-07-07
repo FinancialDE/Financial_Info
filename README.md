@@ -19,6 +19,10 @@ HH's working code (Temporary)
 - Run test for the `CompanyInfo_ETL` pipeline:
   `python -i tests/test_company_info.py`
 
+## Usage
+
+- Demo notebooks can be viewed [here](./notebooks/demo/). 
+
 ## To Do's
 
 - Re-define data schema
