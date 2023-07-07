@@ -49,7 +49,7 @@ class IncomeStatement_ETL(Base_ETL):
         df = df.loc[df['date'].isin(pd.date_range(start=date_range[0], end=date_range[1]))]
         return df.reset_index(drop=True)
     
-    def transform(self, filename_in, filename_out):
+    def transform(self, filename_in, filename_out, save_mode='parquet'):
 
         df_raw = pd.read_csv(filename_in)
 
@@ -59,6 +59,10 @@ class IncomeStatement_ETL(Base_ETL):
 
         df = df[self.columns_to_keep]
 
-        df.to_csv(filename_out, index=False)
+        if save_mode == 'parquet':
+            df.to_parquet(filename_out)
+        
+        elif save_mode == 'csv':
+            df.to_csv(filename_out, index=False)
 
         return df

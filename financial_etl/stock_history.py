@@ -97,7 +97,7 @@ class StockHistory_ETL(Base_ETL):
 
         return df
     
-    def transform(self, symbols, dir_data_lake, filename_out=None):
+    def transform(self, symbols, dir_data_lake, filename_out=None, save_mode='parquet'):
         
         if filename_out is None:
             filename_out = os.path.join(self.dir_data, 'stock_history.csv')
@@ -109,7 +109,12 @@ class StockHistory_ETL(Base_ETL):
             df_list.append(df)
     
         joined_df = self.concat_dataframes(df_list)
-        self.save_to_csv(joined_df, filename=filename_out)
+
+        if save_mode == 'parquet':
+            joined_df.to_parquet(filename_out)
+        
+        elif save_mode == 'csv':
+            joined_df.to_csv(filename_out, index=False)
 
         return joined_df
 

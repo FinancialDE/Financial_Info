@@ -16,11 +16,11 @@ def test_extract(symbols, dir_data_lake):
         etl.extract(symbol, filename)
 
 
-def test_transform(symbols, dir_data_lake, filename_out):
+def test_transform(symbols, dir_data_lake, filename_out, save_mode='parquet'):
 
     etl = StockHistory_ETL()
 
-    df = etl.transform(symbols, dir_data_lake, filename_out)
+    df = etl.transform(symbols, dir_data_lake, filename_out, save_mode)
 
     return df
 
@@ -41,5 +41,8 @@ if __name__ == '__main__':
 
     test_extract(symbols, dir_data_lake)
 
-    filename_out = os.path.join(dir_data, 'stock_history.csv')
-    df = test_transform(symbols, dir_data_lake, filename_out)
+    filename_out = os.path.join(dir_data, 'stock_history.parquet')
+    df = test_transform(symbols, dir_data_lake, filename_out, save_mode='parquet')
+
+    #filename_out = os.path.join(dir_data, 'stock_history.csv')
+    #df = test_transform(symbols, dir_data_lake, filename_out, save_mode='csv')
