@@ -33,7 +33,7 @@ if __name__ == '__main__':
     symbols = ['JPM', 'GS']
 
     filename_raw = os.path.join(dir_data_lake, 'balance_sheet.csv')
-    #test_extract(symbols=symbols, filename_out=filename_raw)
+    test_extract(symbols=symbols, filename_out=filename_raw)
 
     filename_out = os.path.join(dir_data, 'balance_sheet.parquet')
     df = test_transform(filename_in=filename_raw, filename_out=filename_out, save_mode='parquet')
