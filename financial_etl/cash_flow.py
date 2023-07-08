@@ -26,7 +26,11 @@ class CashFlow_ETL(Base_ETL):
             
             filename_out = os.path.join(self.dir_data_lake, 'cash_flow.csv')
 
-        raw_data.to_csv(filename_out, index=True)
+        bucket_name = 'lg18dagbucket'
+        object_key = 's3://lg18dagbucket/STAGING/cash_flow.csv'
+
+        s3_client = boto3.client('s3')
+        s3_client.upload_file(filename_out, bucket_name, object_key)
     
     def _rename_columns(self, df, column_rename_mapping={'asOfDate': 'date'}):
         return df.rename(columns=column_rename_mapping)
@@ -47,9 +51,19 @@ class CashFlow_ETL(Base_ETL):
         df = df[self.columns_to_keep]
 
         if save_mode == 'parquet':
-            df.to_parquet(filename_out)
+            bucket_name = 'lg18dagbucket'
+            object_key = 's3://lg18dagbucket/to_warehouse/cash_flow.parquet'
+
+            s3_client = boto3.client('s3')
+            s3_client.upload_file(filename_out, bucket_name, object_key)
         
         elif save_mode == 'csv':
             df.to_csv(filename_out, index=False)
+            bucket_name = 'lg18dagbucket'
+            object_key = 's3://lg18dagbucket/to_warehouse/cash_flow_cleaned.csv'
+
+            s3_client = boto3.client('s3')
+            s3_client.upload_file(filename_out, bucket_name, object_key)
+            
 
         return df
