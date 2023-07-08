@@ -2,6 +2,7 @@ import os
 from yahooquery import Ticker
 from financial_etl.base import Base_ETL
 import pandas as pd
+import boto3
 
 class BalanceSheet_ETL(Base_ETL):
 
