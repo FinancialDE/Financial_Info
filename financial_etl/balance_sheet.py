@@ -68,7 +68,6 @@ class BalanceSheet_ETL(Base_ETL):
             s3_client.upload_file(filename_out, bucket_name, object_key)
         
         elif save_mode == 'csv':
-            df.to_csv(filename_out, index=False)
             bucket_name = 'lg18dagbucket'
             object_key = 's3://lg18dagbucket/to_warehouse/balance_sheet_cleaned.csv'
 
