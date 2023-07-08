@@ -62,7 +62,7 @@ class BalanceSheet_ETL(Base_ETL):
 
         if save_mode == 'parquet':
             bucket_name = 'lg18dagbucket'
-            object_key = 's3://lg18dagbucket/to_warehouse/balance_sheet.py'
+            object_key = 's3://lg18dagbucket/to_warehouse/balance_sheet.csv'
 
             s3_client = boto3.client('s3')
             s3_client.upload_file(filename_out, bucket_name, object_key)
