@@ -1,6 +1,6 @@
 # The `FinancialInstitutions` class fetches data from the SEC website for financial institutions based on SIC codes and
 # provides methods to access and manipulate the data.
-from cik_to_ticker import CikToTicker
+from financial_etl.cik_to_ticker import CikToTicker
 import time
 import requests
 import pandas as pd
@@ -77,7 +77,7 @@ class FinancialInstitutions():
         return self.total_data.shape[0]
 
     def tickers(self):
-      return self.total_data['Ticker'].tolist()
+      return set(self.total_data['Ticker'].tolist())
 
 # Example usage:
 # sec_institutions = FinancialInstitutions()
