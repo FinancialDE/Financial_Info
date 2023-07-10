@@ -19,8 +19,8 @@ if __name__ == '__main__':
     print(sec_server.count())
     symbols = sec_server.tickers()
 
-    # expect symbols to include SVB and JPM
-    desired_symbols = ['JPM', 'GS', 'SVB']
+    # expect symbols to include SIVBQ and JPM
+    desired_symbols = ['JPM', 'GS', 'SIVBQ']
 
     # get the intersection of the two lists
     symbols = list(set(symbols) & set(desired_symbols))
