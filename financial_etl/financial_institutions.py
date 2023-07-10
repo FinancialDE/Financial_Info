@@ -80,7 +80,7 @@ class FinancialInstitutions():
       return self.total_data['Ticker'].tolist()
 
 # Example usage:
-sec_institutions = FinancialInstitutions()
-sec_institutions.fetch_data()
+# sec_institutions = FinancialInstitutions()
+# sec_institutions.fetch_data()
 
-print(sec_institutions.tickers())
+# print(sec_institutions.tickers())
