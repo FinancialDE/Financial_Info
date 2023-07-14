@@ -50,7 +50,7 @@ class BalanceSheet_ETL(Base_ETL):
 
             filename_out = os.path.join(self.dir_data_lake, 'balance_sheet.csv')
         raw_data.to_csv(filename_out, index = True)
-        object_key = self._raw_object_key + ' balance_sheet.csv'
+        object_key = 's3://lg18dagbucket/STAGING/balance_sheet.csv'
         self._save_data_in_s3(filename_out, object_key)
 
     def _rename_columns(self, df, column_rename_mapping={'asOfDate': 'date'}):

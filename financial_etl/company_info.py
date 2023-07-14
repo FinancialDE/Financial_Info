@@ -14,9 +14,9 @@ class CompanyInfo_ETL(Base_ETL):
     def extract(self, symbols, filename_out=None):
         '''Extract Company Info with Yfianace API
 
-            Args: 
+            Args:
                 symbols = ['JPM', 'GS', 'MS', 'SIVBQ']
-            
+
             Returns:
                 pd.DataFrame
         '''
@@ -26,16 +26,16 @@ class CompanyInfo_ETL(Base_ETL):
         if filename_out is None:
             if not os.path.exists(self.dir_data_lake):
                 os.makedirs(self.dir_data_lake)
-            
-            filename_out = os.path.join(self.dir_data_lake, 'company_info.json')
 
+            filename_out = os.path.join(self.dir_data_lake, 'company_info.json')
         self.save_to_json(raw_data, filename_out)
+        object_key = 's3://lg18dagbucket/STAGING/company_info.json'
+        self._save_data_in_s3(filename_out, object_key)
 
     def _rename_columns(self, df, column_rename_mapping={'asOfDate': 'date'}):
         return df.rename(columns=column_rename_mapping)
-    
+
     def transform(self, filename_in, filename_out, save_mode='parquet'):
-        
         with open(filename_in, "r") as file:
             raw_data = json.load(file)
 
@@ -57,8 +57,12 @@ class CompanyInfo_ETL(Base_ETL):
 
         if save_mode == 'parquet':
             df.to_parquet(filename_out)
-        
+            object_key = 's3://lg18dagbucket/to_warehouse/company_info_cleaned.parquet'
+            self._save_data_in_s3(filename_out, object_key)
+
         elif save_mode == 'csv':
             df.to_csv(filename_out, index=False)
+            object_key = 's3://lg18dagbucket/to_warehouse/company_info_cleaned.csv'
+            self._save_data_in_s3(filename_out, object_key)
 
         return df
