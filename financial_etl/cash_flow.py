@@ -42,8 +42,8 @@ class CashFlow_ETL(Base_ETL):
             filename_out = os.path.join(self.dir_data_lake, 'cash_flow.csv')
 
         raw_data.to_csv(filename_out, index=True)
-        bucket_name = 'lg18dagbucket'
-        object_key = 's3://lg18dagbucket/Raw_Data/cash_flow.csv'
+        bucket_name = self._bucket_name
+        object_key = self._raw_object_key + 'cash_flow.csv' 
 
         s3_client = boto3.client('s3')
         s3_client.upload_file(filename_out, bucket_name, object_key)
