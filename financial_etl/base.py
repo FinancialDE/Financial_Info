@@ -11,7 +11,7 @@ class Base_ETL():
     def __init__(self):
         self.aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
         self.aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-        self.aws_s3_bucket = 'testingbucketteam18'
+        self.aws_s3_bucket = 'lg18dagbucket'
         self.aws_rds_host = os.getenv('AWS_RDS_HOST')
         self.aws_rds_port = os.getenv('AWS_RDS_PORT')
         self.aws_rds_db_name = os.getenv('AWS_RDS_DB_NAME')
@@ -19,7 +19,7 @@ class Base_ETL():
         self.aws_rds_password = os.getenv('AWS_RDS_DB_PASSWORD')
 
         self._get_path_variables()
-    
+
     def _get_path_variables(self):
         self.dir_thisfile = os.path.dirname(os.path.abspath(__file__))
         self.dir_repo = os.path.join(self.dir_thisfile, '../')
@@ -46,33 +46,25 @@ class Base_ETL():
     def save_to_csv(self, df, filename):
         '''Save the input DataFrame to a CSV file'''
         df.to_csv(filename, index=False)
-    
+
     def save_to_json(self, data, filename):
         '''Save the input data to json file'''
 
         with open(filename, 'w') as file:
             json.dump(data, file)
 
-    def _save_raw_data_in_s3(self, raw_data, symbol):
-        s3_client = boto3.client('s3', aws_access_key_id= self.aws_access_key_id, aws_secret_access_key= self.aws_secret_access_key)
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(suffix='.json') as temp_file:
-            # Write the JSON data to the temporary file
-            temp_file.write(raw_data.content)
-            temp_file.flush()
-
-            # Upload the temporary file to Amazon S3
-            object_key = f'{symbol}.json'  # Customize the object key as needed
-            s3_client.upload_file(temp_file.name, self.aws_s3_bucket, object_key)
+    def _save_data_in_s3(self, filename_out, object_key):
+        s3_client = boto3.client('s3')
+        s3_client.upload_file(filename_out, self.bucket_name, object_key)
 
     def _filter_columns(self, df, drop_threshold=0.8):
         ''' Drop columns that have a high percentage of null values'''
 
         null_fractions = df.isnull().mean()
         columns_to_drop = null_fractions[null_fractions > drop_threshold].index
-        
+
         print("Number of columns in the original DataFrame:", len(df.columns))
         print("Number of columns to be dropped:", len(columns_to_drop))
         print('Columns to drop:', columns_to_drop)
-        
+
         return df.drop(columns=columns_to_drop)

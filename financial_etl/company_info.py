@@ -45,6 +45,8 @@ class CompanyInfo_ETL(Base_ETL):
 
             filename_out = os.path.join(self.dir_data_lake, 'company_info.json')
         self.save_to_json(raw_data, filename_out)
+        object_key = 's3://lg18dagbucket/STAGING/company_info.json'
+        self._save_data_in_s3(filename_out, object_key)
 
         bucket_name = self._bucket_name
         object_key = self._raw_object_key + 'company_info.json'
@@ -56,7 +58,9 @@ class CompanyInfo_ETL(Base_ETL):
         return df.rename(columns=column_rename_mapping)
 
     def transform(self, filename_in, filename_out, save_mode='parquet'):
+
         s3_client = boto3.client('s3')
+
         with open(filename_in, "r") as file:
             raw_data = json.load(file)
 
@@ -78,6 +82,7 @@ class CompanyInfo_ETL(Base_ETL):
 
         if save_mode == 'parquet':
             df.to_parquet(filename_out)
+
             bucket_name = self._bucket_name
             object_key = self._object_key + 'company_info_cleaned.parquet'
             s3_client.upload_file(filename_out, bucket_name, object_key)
@@ -86,6 +91,7 @@ class CompanyInfo_ETL(Base_ETL):
             bucket_name = self._bucket_name
             object_key = self._object_key + 'company_info_cleaned.csv'
             s3_client.upload_file(filename_out, bucket_name, object_key)
+
         return df
     
     def load(self):

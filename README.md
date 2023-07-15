@@ -5,16 +5,26 @@ HH's working code (Temporary)
 
 - Put a `.env` file in this repository directory. An example content in `.env` would be:
 ```
-YFINANCE_USER = ourYFinanceAccount@gmail.com
-YFINANCE_PASSWORD = ourYFinancePW
-AWS_RDS_HOST = ourHost
-AWS_RDS_PORT= ourPORT
-AWS_RDS_DB_NAME = ourNAME
-AWS_RDS_DB_USER = user_name
-AWS_RDS_DB_PASSWORD = ourPW
-STOCK_API_KEY = 0URAPIKEYID
+YFINANCE_USER=email@gmail.com
+YFINANCE_PASSWORD=pw
+BUCKET_NAME='example_bucket'
+OBJECT_KEY='example_key'
+RAW_OBJECT_KEY='example_key'
+REDSHIFT_ENDPOINT='host'
+REDSHIFT_PORT='5439'
+REDSHIFT_DB_NAME='dev'
+REDSHIFT_USER='admin'
+REDSHIFT_PASSWORD='pw'
+PSYCOPG2= psycopg2.connect(
+        dbname='dev',
+        user='admin',
+        password='pw',
+        host='host',
+        port='5439'
+        )
+ARN='example
 ```
-  
+
 
 ## Run Tests
 
@@ -35,12 +45,12 @@ STOCK_API_KEY = 0URAPIKEYID
 
 ## Usage
 
-- Demo notebooks can be viewed [here](./notebooks/demo/). 
+- Demo notebooks can be viewed [here](./notebooks/demo/).
 
 ## To Do's
 
-- Add CIK to company_info ETL (requires interacting with FinancialInstitutions or the output table of FinancialInstitutions). 
-- 
+- Add CIK to company_info ETL (requires interacting with FinancialInstitutions or the output table of FinancialInstitutions).
+-
 
 ## Finished
 
@@ -54,5 +64,5 @@ STOCK_API_KEY = 0URAPIKEYID
 
   filename_parquet = './data/balance_sheet.parquet'
   df = pd.read_parquet(filename_parquet)
-   
+
   ```
