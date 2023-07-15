@@ -47,22 +47,3 @@ ARN='example
 
 - Demo notebooks can be viewed [here](./notebooks/demo/).
 
-## To Do's
-
-- Add CIK to company_info ETL (requires interacting with FinancialInstitutions or the output table of FinancialInstitutions).
--
-
-## Finished
-
-- Transform data to new defined data schema. Check the [data directory](./data/) to view transformed data model.
-
-- Change the transformed data output to parquet. Check the [data directory](./data/) to download the .parquet files.
-  ``` python
-  # To check the .parquet file
-
-  import pandas as pd
-
-  filename_parquet = './data/balance_sheet.parquet'
-  df = pd.read_parquet(filename_parquet)
-
-  ```
