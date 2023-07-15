@@ -1,5 +1,5 @@
-# HHworking
-HH's working code (Temporary)
+# Financial_Info
+ETL pipeline for financial institution information
 
 ## Local Environment Setup
 
