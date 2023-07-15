@@ -4,6 +4,11 @@ import csv
 import mysql.connector
 import os
 import json
+import boto3
+import io
+import psycopg2
+from sqlalchemy import create_engine
+from selenium import webdriver
 from financial_etl.base import Base_ETL
 
 class StockHistory_ETL(Base_ETL):
@@ -13,6 +18,18 @@ class StockHistory_ETL(Base_ETL):
         super().__init__()  # Call the parent class __init__ method
         self._APIkey = os.getenv('STOCK_API_KEY')
         self.url_AlphaVtg = 'https://www.alphavantage.co/query'
+        self._object_key = os.getenv('OBJECT_KEY')
+        self._raw_object_key = os.getenv('RAW_OBJECT_KEY')
+        #Redshift Arguments
+        self._redshift_endpoint = os.getenv('REDSHIFT_ENDPOINT')
+        self._redshift_port = os.getenv('REDSHIFT_PORT')
+        self._redshift_db_name = os.getenv('REDSHIFT_DB_NAME')
+        self._redshift_user = os.getenv('REDSHIFT_USER')
+        self._redshift_password = os.getenv('REDSHIFT_PASSWORD')
+        
+        #S3 Arguments
+        self._bucket_name = os.getenv('BUCKET_NAME')
+        self._object_key = os.getenv('OBJECT_KEY')
 
     def extract(self, symbol, filename_out=None):
         ''' Extract Stock Market Data with AlphaVantage API given symbol of the company
@@ -61,6 +78,7 @@ class StockHistory_ETL(Base_ETL):
 
 
     def transform_single_firm(self, symbol, dir_data_lake):
+        
 
         filename = os.path.join(dir_data_lake, symbol+'.json')
         with open(filename, "r") as file:
@@ -97,11 +115,14 @@ class StockHistory_ETL(Base_ETL):
 
         return df
     
-    def transform(self, symbols, dir_data_lake, filename_out=None, save_mode='parquet'):
+    def transform(self, symbols, dir_data_lake, filename_out=None, save_mode='csv'):
         
+        bucket_name = self._bucket_name
+        s3_client = boto3.client('s3')
         if filename_out is None:
             filename_out = os.path.join(self.dir_data, 'stock_history.csv')
 
+        print(filename_out)
         df_list = []
         for symbol in symbols:
         
@@ -112,54 +133,95 @@ class StockHistory_ETL(Base_ETL):
 
         if save_mode == 'parquet':
             joined_df.to_parquet(filename_out)
-        
+            object_key = self._object_key + 'stock_history_cleaned.parquet'
+            s3_client.upload_file(filename_out, bucket_name, object_key)
         elif save_mode == 'csv':
             joined_df.to_csv(filename_out, index=False)
+            object_key = self._object_key + 'stock_history_cleaned.csv'
+            s3_client.upload_file(filename_out, bucket_name, object_key)
+
 
         return joined_df
 
-    def load(self, file_csv, table_name):
-        '''Load CSV data to SQL Database'''
+    def load(self):
+        """ This function creates the s3 and redshift connection,
+            creates the stock_history table and loads the transformed table into Redshift."""
+        bucket_name = self._bucket_name
 
-        # Connect to the AWS RDS database
-        conn = mysql.connector.connect(
-            host=self.aws_rds_host,
-            port=self.aws_rds_port,
-            database=self.aws_rds_db_name,
-            user=self.aws_rds_user,
-            password=self.aws_rds_password
+        object_key = self._object_key + "stock_history_cleaned.csv" 
+         
+        REDSHIFT_ENDPOINT = self._redshift_endpoint 
+        REDSHIFT_PORT = self._redshift_port
+        REDSHIFT_DB_NAME = self._redshift_db_name 
+        REDSHIFT_USER = self._redshift_user
+        REDSHIFT_PASSWORD = self._redshift_password
+        engine =  create_engine(f'redshift+redshift_connector://{REDSHIFT_USER}:{REDSHIFT_PASSWORD}@{REDSHIFT_ENDPOINT}:{REDSHIFT_PORT}/{REDSHIFT_DB_NAME}')
+         
+        # Delete existing table named "balance_sheet"
+        sql_query = """DROP TABLE IF EXISTS stock_history"""
+         
+        with engine.connect() as connection:
+             connection.execute(sql_query)
+         
+         
+        # Create a new table named "balance_sheet"
+        sql_query = """CREATE TABLE IF NOT EXISTS stock_history 
+                        (
+                          address VARCHAR(255),
+                          city VARCHAR(100),
+                          state VARCHAR(50),
+                          zip INT,
+                          country VARCHAR(100),
+                          phone VARCHAR(20),
+                          website VARCHAR(255),
+                          industry VARCHAR(100),
+                          sector VARCHAR(100),
+                          long_business_summary VARCHAR(MAX),
+                          full_time_employees INT,
+                          symbol VARCHAR(10)
+                        )
+                     """
+        #execute_sql(sql_query, conn_string)
+        
+        with engine.begin() as connection:
+             connection.execute(sql_query) 
+        
+        # Load SQL Data into S3
+        conn = psycopg2.connect(
+        dbname=self._redshift_db_name,
+        user=self._redshift_user,
+        password=self._redshift_password,
+        host=self._redshift_endpoint,
+        port=self._redshift_port
         )
-
-        # Create a cursor object
+    
         cursor = conn.cursor()
+        
+        copy_command = f"""
+    COPY dev.public.stock_history
+    FROM 's3://lg18dagbucket/s3://lg18dagbucket/to_warehouse/stock_history_cleaned.csv'
+    IAM_ROLE 'arn:aws:iam::380332205208:role/service-role/AmazonRedshift-CommandsAccessRole-20230708T074227'
+    FORMAT AS CSV DELIMITER ',' QUOTE '"' IGNOREHEADER 1 REGION AS 'us-east-1';
+"""
 
-        # Create the table if it doesn't exist
-        cursor.execute(f'''
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                date TEXT,
-                symbol TEXT,
-                open_price FLOAT,
-                high_price FLOAT,
-                low_price FLOAT,
-                close_price FLOAT,
-                volume INT,
-                is_quarter BOOLEAN,
-                is_annual BOOLEAN
-            );
-        ''')
-
-        with open(file_csv, 'r') as f:
-            reader = csv.reader(f)
-            next(reader)  # Skip the header row
-            data = [tuple(row) for row in reader]  # Convert rows to tuples
-
-        cursor.executemany(f'''
-            INSERT INTO {table_name} (date, symbol, open_price, high_price, low_price, close_price, volume, is_quarter, is_annual)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-        ''', data)  # Pass data as the second parameter
-
-        conn.commit()  # Commit the changes to the database
-
-        cursor.close()  # Close the cursor
-        conn.close()  # Close the connection
+        cursor.execute(copy_command)
+        conn.commit()
+        
+        cursor.close()
+        conn.close()
+    
+    def remove_files(self):
+        data_lake_dir = os.path.join(os.path.dirname(__file__), '..', 'data_lake')
+        data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+    
+        # Remove files in the data_lake directory
+        for filename in os.listdir(data_lake_dir):
+            file_path = os.path.join(data_lake_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+    
+        # Remove files in the data directory
+        for filename in os.listdir(data_dir):
+            file_path = os.path.join(data_dir, filename)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
